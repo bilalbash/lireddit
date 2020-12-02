@@ -1,25 +1,36 @@
-import { ThemeProvider, CSSReset } from '@chakra-ui/core';
-import { Provider, createClient, dedupExchange, fetchExchange } from 'urql';
-import { cacheExchange, Cache, QueryInput, query } from '@urql/exchange-graphcache';
+import { ThemeProvider, CSSReset } from "@chakra-ui/core";
+import { Provider, createClient, dedupExchange, fetchExchange } from "urql";
+import {
+  cacheExchange,
+  Cache,
+  QueryInput,
+  query,
+} from "@urql/exchange-graphcache";
 import theme from "../theme";
-import { MeDocument, LoginMutation, MeQuery, RegisterMutation, LogoutMutation } from "../generated/graphql";
+import {
+  MeDocument,
+  LoginMutation,
+  MeQuery,
+  RegisterMutation,
+  LogoutMutation,
+} from "../generated/graphql";
 
 function betterUpdateQuery<Result, Query>(
   cache: Cache,
   qi: QueryInput,
   result: any,
-  fn: (r: Result, q: Query ) => Query
+  fn: (r: Result, q: Query) => Query
 ) {
-  return cache.updateQuery(qi, (data) => fn(result, data as any) as any );
+  return cache.updateQuery(qi, (data) => fn(result, data as any) as any);
 }
 
-const client = createClient({ 
-  url: 'http://localhost:4000/graphql',
+const client = createClient({
+  url: "http://localhost:4000/graphql",
   fetchOptions: {
     credentials: "include",
   },
   exchanges: [
-    dedupExchange, 
+    dedupExchange,
     cacheExchange({
       updates: {
         Mutation: {
@@ -33,8 +44,8 @@ const client = createClient({
           },
           login: (_result, args, cache, info) => {
             betterUpdateQuery<LoginMutation, MeQuery>(
-              cache, 
-              {query: MeDocument},
+              cache,
+              { query: MeDocument },
               _result,
               (result, query) => {
                 if (result.login.errors) {
@@ -50,7 +61,7 @@ const client = createClient({
           register: (_result, args, cache, info) => {
             // cache.updateQuery({ query: MeDocument }, (data: MeQuery) => {});
             betterUpdateQuery<RegisterMutation, MeQuery>(
-              cache, 
+              cache,
               { query: MeDocument },
               _result,
               (result, query) => {
@@ -66,7 +77,7 @@ const client = createClient({
           },
         },
       },
-    }), 
+    }),
     fetchExchange,
   ],
 });
@@ -79,7 +90,7 @@ function MyApp({ Component, pageProps }: any) {
         <Component {...pageProps} />
       </ThemeProvider>
     </Provider>
-  )
+  );
 }
 
-export default MyApp
+export default MyApp;
