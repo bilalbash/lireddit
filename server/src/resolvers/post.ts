@@ -2,14 +2,16 @@ import { Post } from "../entities/Post";
 import { MyContext } from "src/types";
 import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
 
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 @Resolver()
 export class PostResolver {
-  
   @Query(() => [Post])
-  posts(@Ctx() { em }: MyContext): Promise<Post[]> {
+  async posts(@Ctx() { em }: MyContext): Promise<Post[]> {
+    await sleep(3000);
     return em.find(Post, {});
   }
-    
+
   @Query(() => Post, { nullable: true })
   post(
     @Arg("id", () => Int) id: number,
@@ -36,9 +38,9 @@ export class PostResolver {
   ): Promise<Post | null> {
     const post = await em.findOne(Post, { id });
     if (!post) {
-      return null
+      return null;
     }
-    if (typeof title !== 'undefined') {
+    if (typeof title !== "undefined") {
       post.title = title;
       await em.persistAndFlush(post);
     }
@@ -50,7 +52,7 @@ export class PostResolver {
     @Arg("id") id: number,
     @Ctx() { em }: MyContext
   ): Promise<Boolean> {
-    await em.nativeDelete(Post, {id});
+    await em.nativeDelete(Post, { id });
     return true;
   }
 }
